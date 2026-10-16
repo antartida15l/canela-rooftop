@@ -1,0 +1,22 @@
+# --- Web ---
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+email-validator>=2.2
+pydantic>=2.8
+pydantic-settings>=2.4
+
+# --- Base de datos ---
+sqlalchemy>=2.0.30
+psycopg[binary]>=3.2
+alembic>=1.13
+python-dotenv>=1.0
+
+# --- Seguridad ---
+argon2-cffi>=23.1
+pyjwt>=2.9
+slowapi>=0.1.9
+
+# --- Logs y utilidades ---
+structlog>=24.4
+tzdata
