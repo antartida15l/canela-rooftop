@@ -1,0 +1,8 @@
+[
+  {"codigo": "suma-n1-001", "habilidad": "matematica_suma", "nivel": 1,
+   "contenido": {"tipo": "opcion_multiple", "enunciado": "2 + 3 = ?", "opciones": ["4", "5", "6"], "correcta": 1}},
+  {"codigo": "suma-n2-001", "habilidad": "matematica_suma", "nivel": 2,
+   "contenido": {"tipo": "opcion_multiple", "enunciado": "14 + 9 = ?", "opciones": ["21", "23", "24"], "correcta": 1}},
+  {"codigo": "suma-n3-001", "habilidad": "matematica_suma", "nivel": 3,
+   "contenido": {"tipo": "opcion_multiple", "enunciado": "128 + 47 = ?", "opciones": ["165", "175", "185"], "correcta": 1}}
+]

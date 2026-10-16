@@ -23,6 +23,7 @@ limiter.enabled = False
 def limpiar_bd():
     with SessionLocal() as db:
         db.execute(text("TRUNCATE usuarios CASCADE"))
+        db.execute(text("TRUNCATE usuarios, ejercicios CASCADE"))
         db.commit()
     yield
 
@@ -57,3 +58,51 @@ def con_zona(client):
         assert r.status_code == 200, r.text
         return {**headers, "X-Zona-Padres": r.json()["zona_token"]}
     return _zona
+
+@pytest.fixture
+def nino_de(client, con_zona):
+    def _nino(headers, nombre="Luis", condicion="ninguna"):
+        r = client.post("/ninos", json={"nombre": nombre, "edad": 8, "condicion": condicion},
+                        headers=con_zona(headers))
+        assert r.status_code == 201, r.text
+        return r.json()["id"]
+    return _nino
+
+
+EJERCICIOS_BASE = [
+    ("suma-1", "matematica_suma", 1, "2 + 3 = ?", ["4", "5", "6"], 1),
+    ("suma-2", "matematica_suma", 1, "1 + 1 = ?", ["2", "3", "4"], 0),
+    ("suma-3", "matematica_suma", 1, "4 + 4 = ?", ["6", "7", "8"], 2),
+    ("lectura-1", "lectura_vocales", 1, "¿Cuál es una vocal?", ["b", "a", "z"], 1),
+]
+
+
+@pytest.fixture
+def contenido_activo(client, registrar, db):
+    """Crea un admin y deja 3 ejercicios de suma y 1 de lectura, activos y revisados."""
+    h = registrar("admin@test.pe")
+    db.execute(text("UPDATE usuarios SET rol = 'admin' WHERE email = 'admin@test.pe'"))
+    db.commit()
+    ids = {}
+    for codigo, hab, nivel, enunciado, opciones, correcta in EJERCICIOS_BASE:
+        r = client.post("/contenido/ejercicios", headers=h, json={
+            "codigo": codigo, "habilidad": hab, "nivel": nivel,
+            "contenido": {"tipo": "opcion_multiple", "enunciado": enunciado,
+                          "opciones": opciones, "correcta": correcta}})
+        assert r.status_code == 201, r.text
+        eid = r.json()["id"]
+        assert client.post(f"/contenido/ejercicios/{eid}/activar", headers=h).status_code == 200
+        ids[codigo] = {"id": eid, "correcta": correcta}
+    return {"admin": h, "ids": ids}
+
+
+@pytest.fixture
+def objetivo_3(db):
+    """La sesión espera 3 ejercicios (en el catálogo viene de ajustes del perfil)."""
+    db.execute(text("UPDATE perfiles_apoyo SET ajustes = ajustes || "
+                    "jsonb_build_object('ejercicios_objetivo', 3) WHERE codigo = 'general'"))
+    db.commit()
+    yield
+    db.execute(text("UPDATE perfiles_apoyo SET ajustes = ajustes - 'ejercicios_objetivo' "
+                    "WHERE codigo = 'general'"))
+    db.commit()
