@@ -47,3 +47,13 @@ def registrar(client):
         assert r.status_code == 201, r.text
         return {"Authorization": f"Bearer {r.json()['access_token']}"}
     return _registrar
+
+@pytest.fixture
+def con_zona(client):
+    """Define el PIN, lo verifica y devuelve headers con el token de zona de padres."""
+    def _zona(headers, pin="1234", password="clave-larga-123"):
+        client.put("/auth/pin", json={"pin": pin, "password": password}, headers=headers)
+        r = client.post("/auth/pin/verificar", json={"pin": pin}, headers=headers)
+        assert r.status_code == 200, r.text
+        return {**headers, "X-Zona-Padres": r.json()["zona_token"]}
+    return _zona

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     jwt_access_minutes: int = 15
     jwt_refresh_days: int = 30
     cookie_secure: bool = False  # True en producción (HTTPS)
+    zona_padres_minutes: int = 5
 
 
 @lru_cache

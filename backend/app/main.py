@@ -8,6 +8,7 @@ from app.core.rate_limit import limiter
 from app.db import get_db
 from app.modules.cuentas.router import router as cuentas_router
 from app.modules.consentimientos.router import router as consentimientos_router
+from app.modules.ninos.router import router as ninos_router
 
 app = FastAPI(title="NeuroBridge API")
 app.state.limiter = limiter
@@ -16,6 +17,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.include_router(cuentas_router)
 app.include_router(cuentas_router)
 app.include_router(consentimientos_router)
+app.include_router(ninos_router)
 
 @app.get("/salud")
 def salud(db: Session = Depends(get_db)):

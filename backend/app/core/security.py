@@ -52,6 +52,10 @@ def crear_refresh_token(user_id: str, rol: str, token_version: int) -> str:
     return _crear(user_id, rol, token_version, "refresh",
                   timedelta(days=s.jwt_refresh_days))
 
+def crear_zona_token(user_id: str, rol: str, token_version: int) -> str:
+    s = get_settings()
+    return _crear(user_id, rol, token_version, "zona",
+                  timedelta(minutes=s.zona_padres_minutes))
 
 def decodificar_token(token: str, tipo: str) -> dict:
     """Valida firma, expiración y que sea del tipo esperado (access o refresh)."""

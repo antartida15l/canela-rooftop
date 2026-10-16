@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from app.core.rate_limit import limiter
 from app.core.security import (
     COOKIE_REFRESH, TokenInvalido, borrar_cookie_refresh, crear_access_token,
-    crear_refresh_token, decodificar_token, hash_secreto, poner_cookie_refresh,
-    verificar_secreto,
+    crear_refresh_token, crear_zona_token, decodificar_token, hash_secreto,
+    poner_cookie_refresh, verificar_secreto,
 )
 from app.db import get_db
 from app.deps import usuario_actual
@@ -14,6 +14,7 @@ from app.modules.cuentas.schemas import (
     LoginIn, PinIn, PinSetIn, RegistroIn, TokenOut, UsuarioOut,
 )
 from app.modules.consentimientos import service as consentimientos
+from app.config import get_settings
 
 router = APIRouter(prefix="/auth", tags=["cuentas"])
 
@@ -120,7 +121,11 @@ def verificar_pin(request: Request, datos: PinIn, u: dict = Depends(usuario_actu
                   db: Session = Depends(get_db)):
     resultado = service.verificar_pin(db, u["id"], datos.pin)
     if resultado == "ok":
-        return {"ok": True}
+        return {
+            "ok": True,
+            "zona_token": crear_zona_token(u["id"], u["rol"], u["token_version"]),
+            "expira_en_min": get_settings().zona_padres_minutes,
+        }    
     if resultado == "bloqueado":
         raise HTTPException(
             status.HTTP_423_LOCKED,
