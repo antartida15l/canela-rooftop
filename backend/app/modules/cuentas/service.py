@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_secreto, verificar_secreto
 
-VERSION_TERMINOS = "2026-01"  # subir al publicar los textos validados por el abogado
 MAX_INTENTOS_PIN = 5
 BLOQUEO_PIN_MIN = 15
 
@@ -36,16 +35,6 @@ def crear_usuario(db: Session, email: str, password: str) -> dict | None:
         {"e": email, "p": hash_secreto(password)},
     ).mappings().first()
     return dict(fila) if fila else None
-
-
-def registrar_consentimiento(db: Session, usuario_id: str, tipo: str,
-                             version: str, aceptado: bool) -> None:
-    db.execute(
-        text("""INSERT INTO consentimientos (usuario_id, tipo, version, aceptado)
-                VALUES (CAST(:u AS uuid), :t, :v, :a)"""),
-        {"u": usuario_id, "t": tipo, "v": version, "a": aceptado},
-    )
-
 
 def cerrar_todas_las_sesiones(db: Session, usuario_id: str) -> None:
     db.execute(

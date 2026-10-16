@@ -13,6 +13,7 @@ from app.modules.cuentas import service
 from app.modules.cuentas.schemas import (
     LoginIn, PinIn, PinSetIn, RegistroIn, TokenOut, UsuarioOut,
 )
+from app.modules.consentimientos import service as consentimientos
 
 router = APIRouter(prefix="/auth", tags=["cuentas"])
 
@@ -48,9 +49,7 @@ def registro(
             detail="Ese correo ya está registrado"
         )
 
-    service.registrar_consentimiento(
-        db, u["id"], "terminos", service.VERSION_TERMINOS, True
-    )
+    consentimientos.registrar(db, u["id"], "terminos", True)
     db.commit()
 
     return _emitir(response, u)
