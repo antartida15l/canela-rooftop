@@ -7,6 +7,9 @@ from app.modules.contenido import service as contenido
 from app.modules.ninos import service as ninos
 from app.modules.sesiones import calificacion
 from app.modules.sesiones.congelar_ajustes import congelar
+from app.modules.dominio import service as dominio_srv
+from app.modules.atencion import resumen as resumen_atencion
+from app.modules.consentimientos.service import consentimiento_vigente
 
 _SEL = "s.id::text AS id, s.nino_id::text AS nino_id, s.inicio, s.fin, s.ajustes, s.kpi, s.nota"
 
@@ -91,7 +94,7 @@ def ejercicios_para(db: Session, padre_id: str, sesion_id: str, cantidad: int) -
 def cerrar(db: Session, padre_id: str, sesion_id: str,
            respuestas: list[dict], detalle: dict) -> dict:
     s = db.execute(
-        text("""SELECT s.ajustes, s.fin,
+        text("""SELECT s.ajustes, s.fin, s.nino_id::text AS nino_id,
                        EXTRACT(EPOCH FROM (now() - s.inicio))::int AS duracion
                 FROM sesiones s JOIN ninos n ON n.id = s.nino_id
                 WHERE s.id = CAST(:s AS uuid) AND n.padre_id = CAST(:p AS uuid)
@@ -146,7 +149,19 @@ def cerrar(db: Session, padre_id: str, sesion_id: str,
         "objetivo": objetivo,
         **comp,
     }
-
+    kpi["dominio"] = dominio_srv.aplicar_sesion(db, s["nino_id"], habilidad, items)
+    # Las lecturas emocionales solo se guardan con consentimiento de cámara vigente,
+    # tanto al iniciar la sesión como al cerrarla. Si no, se descartan sin perder la sesión.
+    permitido = bool(s["ajustes"].get("camara")) and consentimiento_vigente(db, padre_id, "camara")
+    if permitido and detalle.get("lecturas"):
+        kpi["atencion"] = resumen_atencion.resumir(
+            detalle["lecturas"], detalle.get("intervenciones", []), detalle.get("pausas", []))
+    elif not permitido:
+        descartadas = len(detalle.get("lecturas", [])) + len(detalle.get("intervenciones", []))
+        detalle = {**detalle, "lecturas": [], "intervenciones": []}
+        if descartadas:
+            kpi["lecturas_descartadas"] = descartadas
+            
     if a_guardar:
         db.execute(
             text("""INSERT INTO respuestas (sesion_id, ejercicio_id, correcta, intentos, ms)

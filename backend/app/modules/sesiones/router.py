@@ -7,8 +7,10 @@ from app.db import get_db
 from app.deps import requiere_rol
 from app.modules.sesiones import service
 from app.modules.sesiones.schemas import (
-    CierreIn, CierreOut, EjercicioPublico, SesionIn, SesionOut,
+    CierreIn, CierreOut, EjercicioPublico, SesionIn, SesionOut,ObservacionOut,
 )
+from app.modules.atencion import observaciones as obs
+from app.modules.ninos import service as ninos
 
 router = APIRouter(prefix="/sesiones", tags=["sesiones"])
 solo_padres = requiere_rol("padre")
@@ -56,10 +58,19 @@ def cerrar(sesion_id: UUID, datos: CierreIn, u: dict = Depends(solo_padres),
     respuestas = [{"ejercicio_id": str(r.ejercicio_id), "elecciones": r.elecciones, "ms": r.ms}
                   for r in datos.respuestas]
     try:
-        return service.cerrar(db, u["id"], str(sesion_id), respuestas, datos.detalle)
+            return service.cerrar(db, u["id"], str(sesion_id), respuestas, datos.detalle.model_dump())
     except service.NoEncontrada:
         raise _404
     except service.SesionCerrada:
         raise HTTPException(status.HTTP_409_CONFLICT, "La sesión ya fue cerrada")
     except service.RespuestasInvalidas as e:
         raise HTTPException(422, str(e))
+
+@router.get("/{sesion_id}/observaciones", response_model=list[ObservacionOut])
+def observaciones(sesion_id: UUID, u: dict = Depends(solo_padres),
+                  db: Session = Depends(get_db)):
+    sesion = service.obtener(db, u["id"], str(sesion_id))
+    if sesion is None:
+        raise _404
+    nino = ninos.obtener(db, u["id"], sesion["nino_id"])
+    return obs.generar(nino["nombre"], sesion["kpi"].get("atencion"))

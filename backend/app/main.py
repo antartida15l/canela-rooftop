@@ -11,7 +11,7 @@ from app.modules.consentimientos.router import router as consentimientos_router
 from app.modules.ninos.router import router as ninos_router
 from app.modules.contenido.router import router as contenido_router
 from app.modules.sesiones.router import router as sesiones_router
-
+from app.modules.dominio.router import router as dominio_router
 
 app = FastAPI(title="NeuroBridge API")
 app.state.limiter = limiter
@@ -23,6 +23,7 @@ app.include_router(consentimientos_router)
 app.include_router(ninos_router)
 app.include_router(contenido_router)
 app.include_router(sesiones_router)
+app.include_router(dominio_router)
 
 @app.get("/salud")
 def salud(db: Session = Depends(get_db)):

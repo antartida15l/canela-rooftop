@@ -120,16 +120,17 @@ def test_la_correccion_la_hace_el_servidor(
 def test_la_atencion_no_cambia_la_nota(
         client, registrar, nino_de, contenido_activo, objetivo_3):
     h, nino = _escenario(client, registrar, nino_de)
+    client.put("/consentimientos/camara", json={"aceptado": True}, headers=h)
     notas = []
     for atencion in (0.05, 0.95):
         s = _iniciar(client, h, nino).json()
         r = client.post(f"/sesiones/{s['id']}/cerrar", headers=h, json={
             "respuestas": _perfectas(contenido_activo),
-            "detalle": {"atencion": {"promedio": atencion},
-                        "emociones": [{"t": 3, "etiqueta": "frustracion"}]}})
+            "detalle": {"lecturas": [{"t": 3, "rostro": True, "atencion": atencion,
+                                      "emocion": "enojo"}]}})
+        assert r.json()["kpi"]["atencion"]["atencion_media"] == atencion
         notas.append(r.json()["nota"])
     assert notas[0] == notas[1] == 20.0
-
 
 def test_cerrar_dos_veces(client, registrar, nino_de, contenido_activo):
     h, nino = _escenario(client, registrar, nino_de)

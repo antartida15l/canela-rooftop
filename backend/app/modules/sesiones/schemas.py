@@ -1,8 +1,14 @@
-import json
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+Emocion = Literal["neutral", "feliz", "triste", "enojo", "miedo", "sorpresa", "asco", "desprecio"]
+
+
+class _Estricto(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
 
 class SesionIn(BaseModel):
@@ -42,19 +48,50 @@ class RespuestaIn(BaseModel):
         return v
 
 
+# ---- Detalle: solo etiquetas y números, nunca imágenes ----
+class PausaIn(_Estricto):
+    inicio_s: int = Field(ge=0, le=14_400)
+    duracion_s: int = Field(ge=0, le=3_600)
+    motivo: Literal["programada", "solicitada", "sugerida"] = "programada"
+
+
+class LecturaIn(_Estricto):
+    t: int = Field(ge=0, le=14_400)           # segundos desde el inicio de la sesión
+    rostro: bool = True
+    atencion: float | None = Field(default=None, ge=0, le=1)
+    emocion: Emocion | None = None
+
+    @model_validator(mode="after")
+    def _coherencia(self):
+        if self.rostro and self.atencion is None:
+            raise ValueError("con rostro detectado se requiere 'atencion'")
+        if not self.rostro and (self.atencion is not None or self.emocion is not None):
+            raise ValueError("sin rostro no puede haber atención ni emoción")
+        return self
+
+
+class IntervencionIn(_Estricto):
+    t: int = Field(ge=0, le=14_400)
+    tipo: Literal["aviso_suave", "pausa"]
+    motivo: Literal["atencion_baja", "malestar", "ausente"]
+
+
+class DetalleIn(_Estricto):
+    pausas: list[PausaIn] = Field(default_factory=list, max_length=50)
+    lecturas: list[LecturaIn] = Field(default_factory=list, max_length=1_500)
+    intervenciones: list[IntervencionIn] = Field(default_factory=list, max_length=100)
+
+
 class CierreIn(BaseModel):
     respuestas: list[RespuestaIn] = Field(max_length=100)
-    # Pausas, lecturas emocionales e intervenciones. Solo etiquetas, nunca imágenes.
-    detalle: dict = Field(default_factory=dict)
-
-    @field_validator("detalle")
-    @classmethod
-    def _tamano(cls, v: dict) -> dict:
-        if len(json.dumps(v)) > 200_000:
-            raise ValueError("detalle demasiado grande")
-        return v
+    detalle: DetalleIn = Field(default_factory=DetalleIn)
 
 
 class CierreOut(BaseModel):
     nota: float | None
     kpi: dict
+
+
+class ObservacionOut(BaseModel):
+    nivel: Literal["info", "atencion"]
+    texto: str

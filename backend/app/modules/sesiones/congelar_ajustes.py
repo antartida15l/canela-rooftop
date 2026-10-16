@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.consentimientos.service import consentimiento_vigente
 from app.modules.sesiones.calificacion import OBJETIVO_POR_DEFECTO
-
+from app.modules.atencion.reglas import PARAMS as PARAMS_ATENCION
 
 def congelar(db: Session, padre_id: str, nino: dict, habilidad: str) -> dict:
     """Copia los ajustes del perfil y el estado de la cámara. No incluye el código del
@@ -19,4 +19,5 @@ def congelar(db: Session, padre_id: str, nino: dict, habilidad: str) -> dict:
     ajustes["habilidad"] = habilidad
     ajustes["camara"] = consentimiento_vigente(db, padre_id, "camara")
     ajustes["congelado_en"] = datetime.now(timezone.utc).isoformat()
+    ajustes["atencion"] = dict(PARAMS_ATENCION)
     return ajustes
