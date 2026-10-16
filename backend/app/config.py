@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     jwt_refresh_days: int = 30
     cookie_secure: bool = False  # True en producción (HTTPS)
     zona_padres_minutes: int = 5
+    cors_origins: list[str] = ["http://localhost:5173"]
 
 
 @lru_cache

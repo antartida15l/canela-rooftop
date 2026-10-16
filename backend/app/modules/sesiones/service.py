@@ -177,3 +177,21 @@ def cerrar(db: Session, padre_id: str, sesion_id: str,
     )
     db.commit()
     return {"nota": nota, "kpi": kpi}
+
+
+def verificar(db: Session, padre_id: str, sesion_id: str, ejercicio_id: str, eleccion: int) -> bool:
+    """Solo dice si acertó. No guarda nada: la nota se calcula al cerrar la sesión."""
+    sesion = obtener(db, padre_id, sesion_id)
+    if sesion is None:
+        raise NoEncontrada()
+    if sesion["fin"] is not None:
+        raise SesionCerrada()
+    fila = db.execute(
+        text("SELECT habilidad, contenido FROM ejercicios WHERE id = CAST(:e AS uuid) AND activo"),
+        {"e": ejercicio_id},
+    ).mappings().first()
+    if fila is None or fila["habilidad"] != sesion["ajustes"]["habilidad"]:
+        raise RespuestasInvalidas("Ejercicio inexistente o de otra habilidad")
+    if eleccion >= len(fila["contenido"]["opciones"]):
+        raise RespuestasInvalidas("Opción fuera de rango para el ejercicio")
+    return eleccion == fila["contenido"]["correcta"]

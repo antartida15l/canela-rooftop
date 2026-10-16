@@ -1,3 +1,5 @@
+from fastapi.middleware.cors import CORSMiddleware
+from app.config import get_settings
 from fastapi import Depends, FastAPI
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -14,6 +16,13 @@ from app.modules.sesiones.router import router as sesiones_router
 from app.modules.dominio.router import router as dominio_router
 
 app = FastAPI(title="NeuroBridge API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_settings().cors_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type", "X-Zona-Padres"],
+)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 

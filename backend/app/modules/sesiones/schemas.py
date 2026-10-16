@@ -95,3 +95,11 @@ class CierreOut(BaseModel):
 class ObservacionOut(BaseModel):
     nivel: Literal["info", "atencion"]
     texto: str
+
+
+class VerificarIn(BaseModel):
+    eleccion: int = Field(ge=0, le=5)
+
+
+class VerificarOut(BaseModel):
+    correcta: bool

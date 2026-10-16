@@ -1,0 +1,11 @@
+Coloca aquí el modelo de emociones:
+
+    enet_b0_8_best_vgaf.onnx     (HSEmotion EfficientNet-B0, 8 clases, ~16 MB)
+
+Este archivo NO se sube a Git (ver .gitignore) porque pesa mucho y su licencia
+debe revisarse antes de abrir al público (los pesos de HSEmotion se entrenaron con
+datasets de uso investigativo).
+
+Orden de las clases de salida (el de la librería HSEmotion):
+    0 Anger, 1 Contempt, 2 Disgust, 3 Fear, 4 Happiness, 5 Neutral, 6 Sadness, 7 Surprise
+Entrada: [N, 3, 224, 224] float32, RGB, normalizado con media/desviación de ImageNet.

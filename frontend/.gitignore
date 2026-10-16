@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+# Se generan con "npm run preparar-ia"
+public/ort/
+public/mediapipe/
+public/models/*.onnx

@@ -12,6 +12,8 @@ from app.modules.sesiones.schemas import (
 from app.modules.atencion import observaciones as obs
 from app.modules.ninos import service as ninos
 
+from app.modules.sesiones.schemas import VerificarIn, VerificarOut
+
 router = APIRouter(prefix="/sesiones", tags=["sesiones"])
 solo_padres = requiere_rol("padre")
 _404 = HTTPException(status.HTTP_404_NOT_FOUND, "No encontrado")
@@ -74,3 +76,17 @@ def observaciones(sesion_id: UUID, u: dict = Depends(solo_padres),
         raise _404
     nino = ninos.obtener(db, u["id"], sesion["nino_id"])
     return obs.generar(nino["nombre"], sesion["kpi"].get("atencion"))
+
+
+@router.post("/{sesion_id}/ejercicios/{ejercicio_id}/verificar", response_model=VerificarOut)
+def verificar(sesion_id: UUID, ejercicio_id: UUID, datos: VerificarIn,
+              u: dict = Depends(solo_padres), db: Session = Depends(get_db)):
+    try:
+        return {"correcta": service.verificar(db, u["id"], str(sesion_id), str(ejercicio_id),
+                                              datos.eleccion)}
+    except service.NoEncontrada:
+        raise _404
+    except service.SesionCerrada:
+        raise HTTPException(status.HTTP_409_CONFLICT, "La sesión ya fue cerrada")
+    except service.RespuestasInvalidas as e:
+        raise HTTPException(422, str(e))
