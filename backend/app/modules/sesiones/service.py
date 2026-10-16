@@ -150,6 +150,7 @@ def cerrar(db: Session, padre_id: str, sesion_id: str,
         **comp,
     }
     kpi["dominio"] = dominio_srv.aplicar_sesion(db, s["nino_id"], habilidad, items)
+    
     # Las lecturas emocionales solo se guardan con consentimiento de cámara vigente,
     # tanto al iniciar la sesión como al cerrarla. Si no, se descartan sin perder la sesión.
     permitido = bool(s["ajustes"].get("camara")) and consentimiento_vigente(db, padre_id, "camara")
@@ -161,7 +162,7 @@ def cerrar(db: Session, padre_id: str, sesion_id: str,
         detalle = {**detalle, "lecturas": [], "intervenciones": []}
         if descartadas:
             kpi["lecturas_descartadas"] = descartadas
-            
+
     if a_guardar:
         db.execute(
             text("""INSERT INTO respuestas (sesion_id, ejercicio_id, correcta, intentos, ms)
