@@ -85,3 +85,14 @@ th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--borde); 
 .barras li { display: grid; grid-template-columns: 90px 1fr 50px; gap: 8px; align-items: center; }
 .barras meter { width: 100%; }
 @media (max-width: 720px) { .lab-rejilla { grid-template-columns: 1fr; } }
+.tarjetas-resumen { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin: 16px 0; }
+.dato { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 12px; text-align: center; }
+.dato strong { display: block; font-size: 1.6rem; }
+.dato span { color: var(--suave); font-size: 0.85rem; }
+.sugerencia { color: var(--aviso); font-weight: 600; }
+.nino small { font-size: 0.8rem; font-weight: 400; }
+@media print {
+  .no-imprimir, .cabecera { display: none !important; }
+  body { background: #fff; font-size: 12pt; }
+  .contenedor { max-width: none; padding: 0; }
+}

@@ -23,7 +23,8 @@ Usa `localhost` en las dos direcciones (no mezcles con `127.0.0.1`): la cookie d
 | `/` | sesión iniciada | elegir quién juega |
 | `/jugar/:ninoId` | sesión iniciada | elegir actividad |
 | `/sesion/:ninoId?h=habilidad` | sesión iniciada | ejercicios, pausas, cámara |
-| `/padres` | sesión + PIN | perfiles, consentimientos, historial |
+| `/padres` | sesión + PIN | perfiles, **reporte**, **especialistas**, consentimientos, historial |
+| `/especialista` | cuenta de especialista | reportes de solo lectura de los niños que cada familia compartió |
 | `/laboratorio` | público | prueba la cámara, el modelo y las reglas, sin backend |
 
 ## IA en el navegador (`src/ia/`)
@@ -45,6 +46,19 @@ Sin consentimiento de cámara vigente la sesión funciona igual, sin detección.
 - Los tokens viven solo en memoria (no en `localStorage`); el de refresco es una cookie `httpOnly`.
 - La condición declarada se escribe una vez al crear el perfil y nunca se muestra en pantallas del niño.
 - La zona de padres exige PIN; su token dura 5 minutos y se pierde al recargar.
+
+## Reportes y especialistas
+
+- **Reporte del padre** (zona de padres → Reporte): sesiones, minutos, nota media, aciertos, tendencia, nivel por
+  habilidad, resumen de atención (solo con permiso de cámara) y sugerencias redactadas como observaciones, no como
+  diagnósticos. Se puede imprimir o guardar como PDF.
+- **Especialistas** (zona de padres → Especialistas): la familia da acceso por correo, eligiendo el alcance
+  (*resumen* o *completo*) y la duración (máximo 90 días); puede quitarlo cuando quiera y ve el registro de cada consulta.
+- **Portal del especialista** (`/especialista`): solo lectura. Nunca ve la condición declarada, las respuestas una por
+  una ni las lecturas de cámara en bruto.
+- Las cuentas de especialista y de administrador **no se crean desde la pantalla de registro** (que crea cuentas de
+  padre): las habilita un administrador. En desarrollo:
+  `UPDATE usuarios SET rol='especialista' WHERE email='correo@ejemplo.com';`
 
 ## Pruebas y build
 

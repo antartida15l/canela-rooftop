@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { hayZona, salirDeZona } from "../api/cliente";
 import { useAuth } from "../auth/AuthContext";
 import Consentimientos from "./Consentimientos";
+import Especialistas from "./Especialistas";
 import Historial from "./Historial";
 import ListaNinos from "./ListaNinos";
 import PuertaPin from "./PuertaPin";
+import ReportePadre from "./ReportePadre";
 
-type Seccion = "ninos" | "consentimientos" | "historial";
+type Seccion = "ninos" | "reporte" | "especialistas" | "consentimientos" | "historial";
 
 export default function ZonaPadres() {
   const [abierta, setAbierta] = useState(hayZona());
@@ -46,12 +48,16 @@ export default function ZonaPadres() {
           Cerrar zona de padres
         </button>
       </div>
-      <div className="pestanas">
+      <div className="pestanas no-imprimir" style={{ flexWrap: "wrap" }}>
         {pestana("ninos", "Perfiles")}
+        {pestana("reporte", "Reporte")}
+        {pestana("especialistas", "Especialistas")}
         {pestana("consentimientos", "Consentimientos")}
         {pestana("historial", "Historial")}
       </div>
       {seccion === "ninos" && <ListaNinos />}
+      {seccion === "reporte" && <ReportePadre />}
+      {seccion === "especialistas" && <Especialistas />}
       {seccion === "consentimientos" && <Consentimientos />}
       {seccion === "historial" && <Historial />}
       <hr />

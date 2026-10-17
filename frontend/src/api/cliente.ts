@@ -1,5 +1,12 @@
 import { API_URL } from "../config";
 
+const SIN_CONEXION =
+  "No se pudo conectar con el servidor. Comprueba que el backend esté encendido " +
+  "(uvicorn app.main:app --reload) y mira su terminal por si muestra un error.";
+const SIN_PERMISO =
+  "Esta cuenta no tiene permiso para esta pantalla. Las cuentas de administrador y de " +
+  "especialista no usan las pantallas de padres: entra con una cuenta de padre.";
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -63,12 +70,17 @@ async function pedir(path: string, o: Opciones): Promise<Response> {
     if (!hayZona()) throw new ApiError(403, { codigo: "zona_padres_requerida" });
     headers["X-Zona-Padres"] = zona!.token;
   }
-  return fetch(`${API_URL}${path}`, {
-    method: o.metodo ?? (o.cuerpo !== undefined ? "POST" : "GET"),
-    headers,
-    body: o.cuerpo !== undefined ? JSON.stringify(o.cuerpo) : undefined,
-    credentials: "include", // la cookie httpOnly de refresco
-  });
+  try {
+    return await fetch(`${API_URL}${path}`, {
+      method: o.metodo ?? (o.cuerpo !== undefined ? "POST" : "GET"),
+      headers,
+      body: o.cuerpo !== undefined ? JSON.stringify(o.cuerpo) : undefined,
+      credentials: "include", // la cookie httpOnly de refresco
+    });
+  } catch {
+    // El navegador solo dice "Failed to fetch" tanto si el servidor está apagado como si falló por dentro
+    throw new ApiError(0, SIN_CONEXION);
+  }
 }
 
 let renovando: Promise<boolean> | null = null;
@@ -95,7 +107,8 @@ async function leer(r: Response): Promise<never | unknown> {
   const texto = await r.text();
   const datos = texto ? JSON.parse(texto) : undefined;
   if (!r.ok) {
-    const detalle = datos && typeof datos === "object" && "detail" in datos ? (datos as { detail: unknown }).detail : datos;
+    let detalle: unknown = datos && typeof datos === "object" && "detail" in datos ? (datos as { detail: unknown }).detail : datos;
+    if (r.status === 403 && detalle === "Sin permiso") detalle = SIN_PERMISO;
     const err = new ApiError(r.status, detalle);
     if (err.codigo === "zona_padres_requerida") salirDeZona();
     throw err;

@@ -106,3 +106,14 @@ def objetivo_3(db):
     db.execute(text("UPDATE perfiles_apoyo SET ajustes = ajustes - 'ejercicios_objetivo' "
                     "WHERE codigo = 'general'"))
     db.commit()
+
+
+@pytest.fixture
+def especialista_de(registrar, db):
+    """Crea una cuenta y la convierte en especialista (en producción lo hace un administrador)."""
+    def _crear(email="doc@test.pe"):
+        h = registrar(email)
+        db.execute(text("UPDATE usuarios SET rol = 'especialista' WHERE email = :e"), {"e": email})
+        db.commit()
+        return h
+    return _crear

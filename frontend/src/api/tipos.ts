@@ -86,3 +86,55 @@ export interface CierreResultado {
   nota: number | null;
   kpi: { respondidas?: number; correctas?: number } & Record<string, unknown>;
 }
+
+// ---------- Reportes y especialistas ----------
+export interface Reporte {
+  periodo_dias: number;
+  generado_en: string;
+  alcance: "resumen" | "completo";
+  nino: { nombre: string; edad: number };
+  resumen: {
+    sesiones: number;
+    minutos: number;
+    nota_media: number | null;
+    aciertos_pct: number | null;
+    tendencia: "mejora" | "estable" | "baja" | "insuficiente";
+  };
+  habilidades: { habilidad: string; sesiones: number; nota_media: number | null; nivel: number; dominio: number }[];
+  sesiones: { id: string; inicio: string; habilidad: string; nota: number | null; respondidas: number; correctas: number }[];
+  atencion: {
+    sesiones_con_camara: number;
+    atencion_media: number | null;
+    pct_malestar: number;
+    avisos: number;
+    pausas_sugeridas: number;
+  } | null;
+  recomendaciones: { nivel: "info" | "sugerencia"; texto: string }[] | null;
+}
+
+export interface Acceso {
+  id: string;
+  nino_id: string;
+  especialista_email: string;
+  alcance: "resumen" | "completo";
+  creado_en: string;
+  expira_en: string;
+  revocado_en: string | null;
+  estado: "vigente" | "expirado" | "revocado";
+}
+
+export interface EventoAuditoria {
+  id: number;
+  accion: "otorgado" | "revocado" | "consultado";
+  alcance: "resumen" | "completo" | null;
+  especialista_email: string;
+  fecha: string;
+}
+
+export interface NinoCompartido {
+  nino_id: string;
+  nombre: string;
+  edad: number;
+  alcance: "resumen" | "completo";
+  expira_en: string;
+}

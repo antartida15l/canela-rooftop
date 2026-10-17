@@ -1,3 +1,6 @@
+from app.modules.especialistas.router import router as accesos_router
+from app.modules.especialistas.router import router_especialista
+from app.modules.reportes.router import router as reportes_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from fastapi import Depends, FastAPI
@@ -33,6 +36,9 @@ app.include_router(ninos_router)
 app.include_router(contenido_router)
 app.include_router(sesiones_router)
 app.include_router(dominio_router)
+app.include_router(reportes_router)
+app.include_router(accesos_router)
+app.include_router(router_especialista)
 
 @app.get("/salud")
 def salud(db: Session = Depends(get_db)):
