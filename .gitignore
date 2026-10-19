@@ -1,9 +1,4 @@
 node_modules/
 dist/
-__pycache__/
-*.pyc
-.venv/
-.env
-*.onnx
-*.log
-.DS_Store
+.env*
+.vercel/

@@ -1,8 +1,0 @@
-[
-  {"codigo": "lectura-n1-001", "habilidad": "lectura_comprension", "nivel": 1,
-   "contenido": {"tipo": "opcion_multiple", "enunciado": "Ana tiene un gato. ¿Qué tiene Ana?", "opciones": ["Un perro", "Un gato", "Un pez"], "correcta": 1}},
-  {"codigo": "lectura-n2-001", "habilidad": "lectura_comprension", "nivel": 2,
-   "contenido": {"tipo": "opcion_multiple", "enunciado": "Llovía mucho, así que Luis llevó su paraguas. ¿Por qué llevó el paraguas?", "opciones": ["Hacía sol", "Llovía", "Era de noche"], "correcta": 1}},
-  {"codigo": "lectura-n3-001", "habilidad": "lectura_comprension", "nivel": 3,
-   "contenido": {"tipo": "opcion_multiple", "enunciado": "Aunque estaba cansada, María terminó su tarea antes de dormir. ¿Qué se puede decir de María?", "opciones": ["Dejó la tarea sin terminar", "Fue constante pese al cansancio", "No tenía tarea"], "correcta": 1}}
-]

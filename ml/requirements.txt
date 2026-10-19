@@ -1,9 +1,0 @@
-numpy
-pillow
-onnx
-onnxruntime
-onnxruntime-tools
-torch
-timm
-scikit-learn
-pandas
